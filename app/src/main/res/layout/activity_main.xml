@@ -12,6 +12,7 @@
 
 
     <Button
+        android:id="@+id/logButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="startLogging"
@@ -23,6 +24,11 @@
         android:layout_height="wrap_content"
         android:text="Press start to start logging" />
 
+    <TextView
+        android:id="@+id/connectionMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Waiting for connection"/>
 
     <EditText
         android:layout_height="wrap_content"
