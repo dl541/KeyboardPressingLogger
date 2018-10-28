@@ -1,17 +1,20 @@
 package com.example.android.justjava;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.inputmethodservice.Keyboard;
+import android.inputmethodservice.KeyboardView;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,14 +39,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private File file;
     private int STORAGE_PERMISSION_CODE = 1;
     private int INTERNET_PERMISSION_CODE = 2;
-    public static final String TAG="Connection";
-    public static final int TIMEOUT=10;
-    Intent i=null;
-    TextView tv=null;
-    private String connectionStatus=null;
-    private Handler mHandler=null;
+    public static final String TAG = "Connection";
+    public static final int TIMEOUT = 10;
+    Intent i = null;
+    TextView tv = null;
+    private String connectionStatus = null;
+    private Handler mHandler = null;
     DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    ServerSocket server=null;
+    ServerSocket server = null;
+    private Keyboard mKeyboard;
+    private KeyboardView mKeyboardView;
+    private KeyboardView.OnKeyboardActionListener mOnKeyboardActionListener = new KeyboardView.OnKeyboardActionListener() {
+        @Override
+        public void onKey(int primaryCode, int[] keyCodes) {
+
+            Log.i("Key", "You just pressed 1 button " + primaryCode);
+        }
+
+        @Override
+        public void onPress(int arg0) {
+        }
+
+        @Override
+        public void onRelease(int primaryCode) {
+        }
+
+        @Override
+        public void onText(CharSequence text) {
+        }
+
+        @Override
+        public void swipeDown() {
+        }
+
+        @Override
+        public void swipeLeft() {
+        }
+
+        @Override
+        public void swipeRight() {
+        }
+
+        @Override
+        public void swipeUp() {
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,35 +96,59 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         View logButton = findViewById(R.id.logButton);
         logButton.setOnClickListener(this);
-        i = new Intent(this,MainActivity.class);
+        i = new Intent(this, MainActivity.class);
         mHandler = new Handler();
 
         dir = new File("/sdcard/kivy/ButtonPressingLogger2");
         dir.mkdirs();
 
+        createKeyboard();
         editText = (EditText) this.findViewById(R.id.editText);
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+//        editText.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                if (s.length() > 0) {
+//                    long time = System.currentTimeMillis();
+//                    Timestamp t = new Timestamp(time);
+//                    String newChar = s.toString().substring(s.length() - 1);
+//                    String log = String.format("%s\t%s", newChar, df.format(t));
+//                    //System.out.println(log);
+//                    //new Globals().execute(log);
+//                    //writeToFile(log);
+//                }
+//            }
+//        });
+    }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+    private void createKeyboard() {
+        // Create the Keyboard
+        mKeyboard = new Keyboard(this, R.xml.keyboard);
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (s.length() > 0) {
-                    long time = System.currentTimeMillis();
-                    Timestamp t = new Timestamp(time);
-                    String newChar = s.toString().substring(s.length() - 1);
-                    String log = String.format("%s\t%s", newChar, df.format(t));
-                    //System.out.println(log);
-                    new Globals().execute(log);
-                    //writeToFile(log);
-                }
-            }
-        });
+        // Lookup the KeyboardView
+        mKeyboardView = (KeyboardView) findViewById(R.id.keyboardview);
+        // Attach the keyboard to the view
+        mKeyboardView.setKeyboard(mKeyboard);
+
+        // Do not show the preview balloons
+        //mKeyboardView.setPreviewEnabled(false);
+
+        // Install the key handler
+        mKeyboardView.setOnKeyboardActionListener(mOnKeyboardActionListener);
+    }
+
+    public void openKeyboard(View v) {
+        mKeyboardView.setVisibility(View.VISIBLE);
+        mKeyboardView.setEnabled(true);
+        if (v != null)
+            ((InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
     @Override
@@ -93,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 tv = (TextView) findViewById(R.id.connectionMessage);
 //initialize server socket in a new separate thread
                 new Thread(initializeConnection).start();
-                String msg="Attempting to connect…";
+                String msg = "Attempting to connect…";
                 Toast.makeText(MainActivity.this, msg, msg.length()).show();
                 break;
         }
@@ -102,24 +167,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Runnable initializeConnection = new Thread() {
         public void run() {
             System.out.println("Debug 1");
-            Socket client=null;
+            Socket client = null;
 // initialize server socket
-            try{
+            try {
                 server = new ServerSocket(38300);
-                server.setSoTimeout(TIMEOUT*1000);
-            System.out.println("Debug 2");
+                server.setSoTimeout(TIMEOUT * 1000);
+                System.out.println("Debug 2");
 //attempt to ccept a connection
                 client = server.accept();
                 System.out.println("Debug 4");
-                Globals.socketIn=new Scanner(client.getInputStream());
+                Globals.socketIn = new Scanner(client.getInputStream());
                 Globals.socketOut = new PrintWriter(client.getOutputStream(), true);
             } catch (SocketTimeoutException e) {
 // print out TIMEOUT
-                connectionStatus="Connection has timed out! Please try again";
+                connectionStatus = "Connection has timed out! Please try again";
                 mHandler.post(showConnectionStatus);
             } catch (IOException e) {
                 System.out.println("Debug 3");
-                Log.e(TAG, ""+e);
+                Log.e(TAG, "" + e);
             } finally {
                 Globals.socketOut.println("This is a message from the server");
 //close the server socket
@@ -132,10 +197,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                }
             }
 
-            if (client!=null) {
-                Globals.connected=true;
+            if (client != null) {
+                Globals.connected = true;
 // print out success
-                connectionStatus="Connection was succesful!";
+                connectionStatus = "Connection was succesful!";
                 mHandler.post(showConnectionStatus);
 
                 startActivity(i);
@@ -223,5 +288,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         priceTextView.setText(message);
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
+            String log = createLog(event, x, y);
+            new Globals().execute(log);
+        }
+
+        return false;
+    }
+
+    private String createLog(MotionEvent event, int x, int y) {
+        String log = String.format("%s\t%s\t%s", event.getAction(), x, y);
+        return log;
+    }
 
 }
