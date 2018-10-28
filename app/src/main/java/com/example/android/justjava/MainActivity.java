@@ -19,15 +19,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
@@ -35,7 +32,6 @@ import java.util.Scanner;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText editText;
     private String filename = "Testing.txt";
-    private File dir;
     private File file;
     private int STORAGE_PERMISSION_CODE = 1;
     private int INTERNET_PERMISSION_CODE = 2;
@@ -53,11 +49,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onKey(int primaryCode, int[] keyCodes) {
 
-            Log.i("Key", "You just pressed 1 button " + primaryCode);
+            Log.i("Keyboard", "You just pressed " + primaryCode);
+            editText.append(Character.toString((char) primaryCode));
         }
 
         @Override
         public void onPress(int arg0) {
+
         }
 
         @Override
@@ -99,33 +97,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         i = new Intent(this, MainActivity.class);
         mHandler = new Handler();
 
-        dir = new File("/sdcard/kivy/ButtonPressingLogger2");
-        dir.mkdirs();
-
         createKeyboard();
         editText = (EditText) this.findViewById(R.id.editText);
-//        editText.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                if (s.length() > 0) {
-//                    long time = System.currentTimeMillis();
-//                    Timestamp t = new Timestamp(time);
-//                    String newChar = s.toString().substring(s.length() - 1);
-//                    String log = String.format("%s\t%s", newChar, df.format(t));
-//                    //System.out.println(log);
-//                    //new Globals().execute(log);
-//                    //writeToFile(log);
-//                }
-//            }
-//        });
     }
 
     private void createKeyboard() {
@@ -142,6 +115,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Install the key handler
         mKeyboardView.setOnKeyboardActionListener(mOnKeyboardActionListener);
+        mKeyboardView.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
+                    String log = String.format("%s %s %s", event.getAction(), event.getX(), event.getY());
+                    Log.i("Keyboard", String.format("Action %s is detected", event.getAction()));
+                    new Globals().execute(log);
+                }
+
+                return false;
+            }
+        });
     }
 
     public void openKeyboard(View v) {
@@ -187,14 +173,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.e(TAG, "" + e);
             } finally {
                 Globals.socketOut.println("This is a message from the server");
-//close the server socket
-//                try {
-//                    if (server!=null)
-//                        System.out.println("Socket is closed");
-//                        server.close();
-//                } catch (IOException ec) {
-//                    Log.e(TAG, "Cannot close server socket"+ec);
-//                }
             }
 
             if (client != null) {
@@ -247,63 +225,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private void initialiseFile() throws IOException {
-        System.out.println("Create file");
-        file = new File(dir, filename);
-        BufferedWriter out = new BufferedWriter(new FileWriter(file));
-        System.out.println("Path: " + dir.getPath());
-    }
-
-    private void writeToFile(String text) {
-        try {
-            BufferedWriter out = new BufferedWriter(new FileWriter(file, true));
-            out.write(text + "\n");
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * This method is called when the order button is clicked.
-     */
-    public void startLogging(View view) {
-        EditText editText = (EditText) findViewById(R.id.editText);
-        editText.setText("");
-        long time = System.currentTimeMillis();
-        Timestamp t = new Timestamp(time);
-        DateFormat df = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        filename = df.format(t) + ".txt";
-        displayMessage("Logging in " + filename);
-        try {
-            initialiseFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     private void displayMessage(String message) {
         TextView priceTextView = (TextView) findViewById(R.id.message);
         priceTextView.setText(message);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        int x = (int) event.getX();
-        int y = (int) event.getY();
+    public void stopLogging(View view) {
+        //close the server socket
+        try {
+            if (server != null) {
+                System.out.println("Socket is closed");
+                server.close();
+            }
 
-        if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
-            String log = createLog(event, x, y);
-            new Globals().execute(log);
+            String msg = "Connection closed";
+            Toast.makeText(MainActivity.this, msg, msg.length()).show();
+
+        } catch (IOException ec) {
+            Log.e(TAG, "Cannot close server socket" + ec);
         }
 
-        return false;
     }
-
-    private String createLog(MotionEvent event, int x, int y) {
-        String log = String.format("%s\t%s\t%s", event.getAction(), x, y);
-        return log;
-    }
-
 }
