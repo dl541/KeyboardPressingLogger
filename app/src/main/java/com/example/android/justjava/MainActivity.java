@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
-                    String log = String.format("%s %s %s", event.getAction(), event.getX(), event.getY());
+                    String log = String.format("%s\t%s\t%s", event.getAction(), event.getX(), event.getY());
                     Log.i("Keyboard", String.format("Action %s is detected", event.getAction()));
                     new Globals().execute(log);
                 }
@@ -232,18 +232,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void stopLogging(View view) {
         //close the server socket
-        try {
-            if (server != null) {
-                System.out.println("Socket is closed");
-                server.close();
-            }
-
-            String msg = "Connection closed";
-            Toast.makeText(MainActivity.this, msg, msg.length()).show();
-
-        } catch (IOException ec) {
-            Log.e(TAG, "Cannot close server socket" + ec);
-        }
+        String msg = "Connection closed";
+        Toast.makeText(MainActivity.this, msg, msg.length()).show();
+        new Globals().execute("quit");
 
     }
 }
