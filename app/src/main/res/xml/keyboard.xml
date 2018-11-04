@@ -22,7 +22,7 @@
     android:keyWidth="10%p"
     android:horizontalGap="0px"
     android:verticalGap="0px"
-    android:keyHeight="10%p"
+    android:keyHeight="23%p"
     >
 
     <Row>
