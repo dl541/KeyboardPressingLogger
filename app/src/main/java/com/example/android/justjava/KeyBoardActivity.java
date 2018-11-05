@@ -10,6 +10,7 @@ import android.view.View;
 
 public class KeyBoardActivity extends AppCompatActivity{
 
+    private static int logIndex = 0;
     private Keyboard mKeyboard;
     private KeyboardView mKeyboardView;
     private KeyboardView.OnKeyboardActionListener mOnKeyboardActionListener = new KeyboardView.OnKeyboardActionListener() {
@@ -23,13 +24,15 @@ public class KeyBoardActivity extends AppCompatActivity{
 
             //First flag: 1 represents character message
             //Second flag: 0 represents pressed 1 represents released
-            new Globals().execute(String.format("1\t0\t%s",Character.toString ((char) primaryCode)));
+            new Globals().execute(String.format("%s\t1\t0\t%s",logIndex,Character.toString ((char) primaryCode)));
+            logIndex += 1;
         }
 
         @Override
         public void onRelease(int primaryCode) {
             Log.i("Keyboard", "You just released " + primaryCode);
-            new Globals().execute(String.format("1\t1\t%s",Character.toString ((char) primaryCode)));
+            new Globals().execute(String.format("%s\t1\t1\t%s",logIndex, Character.toString ((char) primaryCode)));
+            logIndex += 1;
         }
 
         @Override
@@ -80,13 +83,17 @@ public class KeyBoardActivity extends AppCompatActivity{
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN ||
+                        event.getAction() == MotionEvent.ACTION_UP ||
+                        event.getAction() == MotionEvent.ACTION_POINTER_DOWN ||
+                        event.getAction() == MotionEvent.ACTION_POINTER_UP) {
 
                     //First flag: 0 represents coordinate message
                     //Second flag: 0 represents pressed 1 represents released
-                    String log = String.format("0\t%s\t%s\t%s", event.getAction(), event.getX(), event.getY());
+                    String log = String.format("%s\t0\t%s\t%s\t%s",logIndex,event.getAction(), event.getX(), event.getY());
                     Log.i("Keyboard", String.format("Action %s is detected", event.getAction()));
                     new Globals().execute(log);
+                    logIndex += 1;
                 }
                 return false;
             }
