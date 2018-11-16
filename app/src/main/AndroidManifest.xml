@@ -22,6 +22,8 @@
         <activity
             android:name=".KeyBoardActivity"
             android:screenOrientation="landscape"></activity>
+        <activity android:name=".OptimizedKeyboardActivity"
+            android:screenOrientation="landscape"></activity>
 
     </application>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
