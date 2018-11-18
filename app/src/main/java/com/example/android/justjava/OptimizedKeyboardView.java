@@ -9,6 +9,10 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * TODO: document your custom view class.
  */
@@ -22,9 +26,8 @@ public class OptimizedKeyboardView extends View {
     private float mTextWidth;
     private float mTextHeight;
 
-    private float centre_x = 150f;
-    private float centre_y = 150f;
-    private int count = 1;
+    private List<OptimizedButton> optimizedButtonList = new ArrayList<OptimizedButton>();
+    private float circleRadius = 25f;
 
     public OptimizedKeyboardView(Context context) {
         super(context);
@@ -42,6 +45,9 @@ public class OptimizedKeyboardView extends View {
     }
 
     private void init(AttributeSet attrs, int defStyle) {
+        this.optimizedButtonList.add(new OptimizedButton(150f,150f,"q"));
+        this.optimizedButtonList.add(new OptimizedButton(500f, 500f, "w"));
+        this.optimizedButtonList.add(new OptimizedButton(1500f, 1000f, "e"));
         // Load attributes
 //        final TypedArray a = getContext().obtainStyledAttributes(
 //                attrs, R.styleable.OptimizedKeyboardView, defStyle, 0);
@@ -112,14 +118,24 @@ public class OptimizedKeyboardView extends View {
 
         Paint circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         circlePaint.setColor(Color.BLUE);
-        canvas.drawCircle(centre_x, centre_y, 25f, circlePaint);
+
+        for(OptimizedButton button: optimizedButtonList) {
+            canvas.drawCircle(button.getCentreX(),button.getCentreY(), circleRadius, circlePaint);
+        }
     }
 
-    public void updateMean(float x, float y){
-        centre_x = (centre_x * count + x) / (count + 1);
-        centre_y = (centre_y * count+ y) / (count + 1);
-        count += 1;
+    public void updateKeyboard(float x, float y){
+        OptimizedButton closestButton = findClosest(x,y);
+        closestButton.updateMean(x,y);
         invalidate();
+    }
+
+    private OptimizedButton findClosest(float x, float y){
+        return optimizedButtonList.stream().min(Comparator.comparing((OptimizedButton button) -> {
+            float distX = button.getCentreX() - x;
+            float distY = button.getCentreY() - y;
+            return distX *distX + distY*distY;
+        } )).get();
     }
 
 //    /**

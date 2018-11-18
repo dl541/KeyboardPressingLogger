@@ -34,7 +34,7 @@ public class OptimizedKeyboardActivity extends AppCompatActivity {
                 }
 
                 if (event.getAction() == MotionEvent.ACTION_DOWN){
-                    optimizedKeyboardBaseView.updateMean(event.getX(),event.getY());
+                    optimizedKeyboardBaseView.updateKeyboard(event.getX(),event.getY());
                 }
 
 
