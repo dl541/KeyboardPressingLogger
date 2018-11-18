@@ -8,14 +8,14 @@ import android.view.View;
 
 public class OptimizedKeyboardActivity extends AppCompatActivity {
 
-    private View optimizedKeyboardBaseView;
+    private OptimizedKeyboardView optimizedKeyboardBaseView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.optimized_keyboard);
-        optimizedKeyboardBaseView = (View) findViewById(R.id.optimizedKeyboardBase);
+        optimizedKeyboardBaseView = (OptimizedKeyboardView) findViewById(R.id.optimizedKeyboardBase);
         optimizedKeyboardBaseView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -32,6 +32,12 @@ public class OptimizedKeyboardActivity extends AppCompatActivity {
                     Log.i("OptimizedKeyboard", log);
 
                 }
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN){
+                    optimizedKeyboardBaseView.updateMean(event.getX(),event.getY());
+                }
+
+
                 return true;
             }
         });
