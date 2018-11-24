@@ -22,7 +22,7 @@ import java.util.Scanner;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private int INTERNET_PERMISSION_CODE = 1;
     public static final String TAG = "Connection";
-    public static final int TIMEOUT = 10;
+    public static final int TIMEOUT = 15;
     private String connectionStatus = null;
     private Handler mHandler = null;
     ServerSocket server = null;
@@ -76,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 // print out success
                 connectionStatus = "Connection was successful!";
                 mHandler.post(showConnectionStatus);
-                startActivity(new Intent(MainActivity.this, KeyBoardActivity.class));
             }
         }
     };
@@ -104,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void stopLogging(View v) throws IOException {
+    public void stopConnection(View v) throws IOException {
         new Globals().execute("quit");
         String msg = "Connection closed.";
         Toast.makeText(this, msg, msg.length()).show();
@@ -114,5 +113,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         catch (IOException e){
             Log.e("MainActivity", "Cannot close socket");
         }
+    }
+
+    public void toNormalKeyboard(View v){
+        startActivity(new Intent(MainActivity.this, KeyBoardActivity.class));
+    }
+
+    public void toOptimizedKeyboard(View v){
+        startActivity(new Intent(MainActivity.this, OptimizedKeyboardActivity.class));
     }
 }

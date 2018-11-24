@@ -23,18 +23,31 @@
                 android:id="@+id/logButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="startLogging"
-                android:text="Start logging" />
+                android:onClick="startConnection"
+                android:text="Start connection" />
 
             <Button
                 android:id="@+id/stopButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="stopLogging"
-                android:text="Stop logging" />
+                android:onClick="stopConnection"
+                android:text="Stop connection" />
+
+            <Button
+                android:id="@+id/normalKeyboardButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="toNormalKeyboard"
+                android:text="normal keyboard" />
+
+            <Button
+                android:id="@+id/optimizedKeyboardButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="toOptimizedKeyboard"
+                android:text="optimized keyboard" />
 
         </LinearLayout>
-
 
     </LinearLayout>
 
