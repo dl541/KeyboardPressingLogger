@@ -1,13 +1,28 @@
 package com.example.android.justjava;
 
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class OptimizedButton {
     private float centreX;
     private float centreY;
+
+    public static Paint getCharacterPaint() {
+        return characterPaint;
+    }
+
+    private static Paint characterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    public int getButtonColor() {
+        return buttonColor;
+    }
+
+    private int buttonColor;
 
     public float getCentreX() {
         return centreX;
@@ -31,7 +46,14 @@ public class OptimizedButton {
         this.character = character;
         this.xWindow.add(x);
         this.yWindow.add(y);
+        characterPaint.setColor(Color.BLACK);
+        characterPaint.setTextSize(40);
+
+        Random rand = new Random();
+        this.buttonColor = Color.rgb(rand.nextInt(),rand.nextInt(),rand.nextInt());
+
     }
+
 
     public void updateMean(float x, float y){
         centreX = (x + centreX * xWindow.size())/(xWindow.size()+1);

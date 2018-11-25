@@ -1,14 +1,16 @@
 package com.example.android.justjava;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -17,17 +19,11 @@ import java.util.List;
  * TODO: document your custom view class.
  */
 public class OptimizedKeyboardView extends View {
-    private String mExampleString; // TODO: use a default from R.string...
-    private int mExampleColor = Color.RED; // TODO: use a default from R.color...
-    private float mExampleDimension = 0; // TODO: use a default from R.dimen...
-    private Drawable mExampleDrawable;
-
-    private TextPaint mTextPaint;
-    private float mTextWidth;
-    private float mTextHeight;
-
     private List<OptimizedButton> optimizedButtonList = new ArrayList<OptimizedButton>();
     private float circleRadius = 25f;
+    public static Bitmap optimizedKeyboardBitmap;
+
+    public static int[] intArray;
 
     public OptimizedKeyboardView(Context context) {
         super(context);
@@ -45,83 +41,82 @@ public class OptimizedKeyboardView extends View {
     }
 
     private void init(AttributeSet attrs, int defStyle) {
-        this.optimizedButtonList.add(new OptimizedButton(150f,150f,"q"));
-        this.optimizedButtonList.add(new OptimizedButton(500f, 500f, "w"));
-        this.optimizedButtonList.add(new OptimizedButton(1500f, 1000f, "e"));
-        // Load attributes
-//        final TypedArray a = getContext().obtainStyledAttributes(
-//                attrs, R.styleable.OptimizedKeyboardView, defStyle, 0);
+        InputStream is = getResources().openRawResource(R.raw.keyboard_data);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
 
-//        mExampleString = a.getString(
-//                R.styleable.OptimizedKeyboardView_exampleString);
-//        mExampleColor = a.getColor(
-//                R.styleable.OptimizedKeyboardView_exampleColor,
-//                mExampleColor);
-        // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
-        // values that should fall on pixel boundaries.
-//        mExampleDimension = a.getDimension(
-//                R.styleable.OptimizedKeyboardView_exampleDimension,
-//                mExampleDimension);
-//
-//        if (a.hasValue(R.styleable.OptimizedKeyboardView_exampleDrawable)) {
-//            mExampleDrawable = a.getDrawable(
-//                    R.styleable.OptimizedKeyboardView_exampleDrawable);
-//            mExampleDrawable.setCallback(this);
-//        }
-//
-//        a.recycle();
-//
-//        // Set up a default TextPaint object
-//        mTextPaint = new TextPaint();
-//        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-//        mTextPaint.setTextAlign(Paint.Align.LEFT);
-//
-//        // Update TextPaint and text measurements from attributes
-//        invalidateTextPaintAndMeasurements();
-    }
-
-//    private void invalidateTextPaintAndMeasurements() {
-//        mTextPaint.setTextSize(mExampleDimension);
-//        mTextPaint.setColor(mExampleColor);
-//        mTextWidth = mTextPaint.measureText(mExampleString);
-//
-//        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
-//        mTextHeight = fontMetrics.bottom;
-//    }
+        try {
+            while (bufferedReader.ready()) {
+                String line = bufferedReader.readLine();
+                String[] lineSplit = line.split("\t");
+                this.optimizedButtonList.add(new OptimizedButton(Float.parseFloat(lineSplit[0]),
+                        Float.parseFloat(lineSplit[1]),
+                        lineSplit[2]));
+            }
+        }
+        catch (IOException e){
+            Log.e("OptimizedKeyboard", e.getMessage());
+            }
+        }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // TODO: consider storing these as member variables to reduce
-        // allocations per draw cycle.
-        int paddingLeft = getPaddingLeft();
-        int paddingTop = getPaddingTop();
-        int paddingRight = getPaddingRight();
-        int paddingBottom = getPaddingBottom();
+        if (optimizedKeyboardBitmap == null){
+            optimizedKeyboardBitmap = Bitmap.createBitmap(getWidth(), getHeight(),
+                    Bitmap.Config.ARGB_8888);
+            intArray = new int[optimizedKeyboardBitmap.getWidth() * optimizedKeyboardBitmap.getHeight()];
 
-        int contentWidth = getWidth() - paddingLeft - paddingRight;
-        int contentHeight = getHeight() - paddingTop - paddingBottom;
+            optimizedKeyboardBitmap.getPixels(intArray, 0, optimizedKeyboardBitmap.getWidth(), 0, 0, optimizedKeyboardBitmap.getWidth(),
+                    optimizedKeyboardBitmap.getHeight());
 
-//        // Draw the text.
-//        canvas.drawText(mExampleString,
-//                paddingLeft + (contentWidth - mTextWidth) / 2,
-//                paddingTop + (contentHeight + mTextHeight) / 2,
-//                mTextPaint);
-//
-//        // Draw the example drawable on top of the text.
-//        if (mExampleDrawable != null) {
-//            mExampleDrawable.setBounds(paddingLeft, paddingTop,
-//                    paddingLeft + contentWidth, paddingTop + contentHeight);
-//            mExampleDrawable.draw(canvas);
-//        }
+            for (int ind = 0; ind < intArray.length; ind++){
+                int row = ind / getWidth();
+                int col = ind % getWidth();
+                int minInd = 0;
+                int minNorm = Integer.MAX_VALUE;
+                for (int buttonInd = 0; buttonInd < optimizedButtonList.size(); buttonInd ++){
+                    int colDiff = Math.round(optimizedButtonList.get(buttonInd).getCentreX()) - col;
+                    int rowDiff = Math.round(optimizedButtonList.get(buttonInd).getCentreY()) - row;
 
-        Paint circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        circlePaint.setColor(Color.BLUE);
+                    if (colDiff*colDiff + rowDiff * rowDiff < minNorm){
+                        minInd = buttonInd;
+                        minNorm = colDiff*colDiff + rowDiff * rowDiff;
+                    }
+                }
+                intArray[ind] = optimizedButtonList.get(minInd).getButtonColor();
+            }
+            optimizedKeyboardBitmap.setPixels(intArray, 0, optimizedKeyboardBitmap.getWidth(), 0, 0, optimizedKeyboardBitmap.getWidth(),
+                    optimizedKeyboardBitmap.getHeight());
+        }
+
+        canvas.drawBitmap(optimizedKeyboardBitmap, 0, 0, null);
 
         for(OptimizedButton button: optimizedButtonList) {
-            canvas.drawCircle(button.getCentreX(),button.getCentreY(), circleRadius, circlePaint);
+            canvas.drawText(button.getCharacter(),button.getCentreX(),button.getCentreY(), OptimizedButton.getCharacterPaint());
         }
+
+        //OpenList voronoiSites = generateVoronoi(canvas);
+
+//        for (int ind = 0; ind < voronoiSites.size; ind ++){
+//            PolygonSimple polygon = voronoiSites.get(ind).getPolygon();
+//            Paint polygonPaint = new Paint();
+//            polygonPaint.setColor(optimizedButtonList.get(ind).getButtonColor());
+//
+//            Path polygonPath = new Path();
+//            double[] xList = polygon.getXPoints();
+//            double[] yList = polygon.getYPoints();
+//
+//            polygonPath.moveTo((float)xList[0], (float)yList[0]);
+//
+//            for (int pointInd = 1; pointInd < xList.length; pointInd++){
+//                polygonPath.lineTo((float)xList[pointInd], (float)yList[pointInd]);
+//            }
+//
+//            polygonPath.close();
+//
+//            canvas.drawPath(polygonPath, polygonPaint);
+//        }
     }
 
     public void updateKeyboard(float x, float y){
@@ -137,6 +132,31 @@ public class OptimizedKeyboardView extends View {
             return distX *distX + distY*distY;
         } )).get();
     }
+
+//    private OpenList generateVoronoi(Canvas canvas){
+//        PowerDiagram diagram = new PowerDiagram();
+//
+//        OpenList sites = new OpenList();
+//
+//        PolygonSimple rootPolygon = new PolygonSimple();
+//        int width = canvas.getWidth();
+//        int height = canvas.getHeight();
+//        rootPolygon.add(0, 0);
+//        rootPolygon.add(width, 0);
+//        rootPolygon.add(width, height);
+//        rootPolygon.add(0, height);
+//
+//        optimizedButtonList.stream().forEach((OptimizedButton button) -> {
+//            sites.add(new Site(button.getCentreX(),button.getCentreY()));
+//        });
+//
+//        diagram.setSites(sites);
+//        diagram.setClipPoly(rootPolygon);
+//
+//        diagram.computeDiagram();
+//
+//        return sites;
+//    }
 
 //    /**
 //     * Gets the example string attribute value.
