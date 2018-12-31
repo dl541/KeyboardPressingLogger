@@ -103,10 +103,13 @@ public class KeyBoardActivity extends AppCompatActivity{
                     int pointerIndex = event.getActionIndex();
                     float actionX = event.getX(pointerIndex);
                     float actionY = event.getY(pointerIndex);
-                    
+
                     String log = String.format("%s\t0\t%s\t%s\t%s",logIndex,action, actionX, actionY);
                     Log.i("Keyboard", String.format("Action %s is detected",action));
-                    new Globals().execute(log);
+
+                    if (Globals.connected) {
+                        new Globals().execute(log);
+                    }
                     logIndex += 1;
                 }
                 return false;
