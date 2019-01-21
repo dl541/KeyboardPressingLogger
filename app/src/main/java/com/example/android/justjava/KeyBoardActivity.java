@@ -106,7 +106,7 @@ public class KeyBoardActivity extends AppCompatActivity{
 
                     String log = String.format("%s\t0\t%s\t%s\t%s",logIndex,action, actionX, actionY);
                     Log.i("Keyboard", String.format("Action %s is detected",action));
-
+                    Log.i("Keyboard", String.format("Sending logs to server: %s", log));
                     if (Globals.connected) {
                         new Globals().execute(log);
                     }
