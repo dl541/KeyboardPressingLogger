@@ -15,9 +15,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * TODO: document your custom view class.
- */
 public class OptimizedKeyboardView extends View {
     private List<OptimizedButton> optimizedButtonList = new ArrayList<OptimizedButton>();
     private float circleRadius = 25f;

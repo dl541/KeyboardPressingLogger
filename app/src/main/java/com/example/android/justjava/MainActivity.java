@@ -10,6 +10,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -34,11 +37,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 //        getWritingPermission();
         getInternetPermission();
-
+        setupDropDownList();
         View logButton = findViewById(R.id.logButton);
         logButton.setOnClickListener(this);
         mHandler = new Handler();
 
+    }
+
+    private void setupDropDownList(){
+        Spinner dropdown = findViewById(R.id.dropDownList);
+        String[] items = new String[]{"L", "R"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        dropdown.setAdapter(adapter);
     }
 
     @Override
@@ -121,5 +131,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void toOptimizedKeyboard(View v){
         startActivity(new Intent(MainActivity.this, OptimizedKeyboardActivity.class));
+    }
+
+    public void toFittsExperiment(View v){
+        Intent fittsIntent = new Intent(MainActivity.this, FittsExperimentActivity.class);
+        EditText editFittsD = findViewById(R.id.FittsD);
+        int D = Integer.parseInt(editFittsD.getText().toString());
+
+        EditText editFittsW = findViewById(R.id.FittsW);
+        int W = Integer.parseInt(editFittsW.getText().toString());
+
+        Spinner dropDown = findViewById(R.id.dropDownList);
+        String hand = dropDown.getSelectedItem().toString();
+        fittsIntent.putExtra("FittsD", D);
+        fittsIntent.putExtra("FittsW", W);
+        fittsIntent.putExtra("Hand", hand);
+        startActivity(fittsIntent);
     }
 }

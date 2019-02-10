@@ -48,6 +48,35 @@
                 android:text="optimized keyboard" />
 
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text = "Fitts Experiment"
+                android:onClick = "toFittsExperiment"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text = "500"
+                android:id = "@+id/FittsD"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text = "50"
+                android:id = "@+id/FittsW"/>
+
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id = "@+id/dropDownList"
+                android:spinnerMode="dropdown">
+            </Spinner>
+        </LinearLayout>
 
     </LinearLayout>
 
